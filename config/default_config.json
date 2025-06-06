@@ -1,0 +1,93 @@
+{
+  "version": "1.0.0",
+  "
+": "TermSage default configuration",
+  
+  "context": {
+    "max_tokens": 4096,
+    "compression_threshold": 0.8,
+    "min_messages": 4,
+    "_comment": "Context management settings"
+  },
+  
+  "command": {
+    "timeout": 30,
+    "max_output_size": 100000,
+    "allow_sudo": false,
+    "working_dir": ".",
+    "_comment": "Command execution settings"
+  },
+  
+  "ai": {
+    "provider_priority": ["ollama", "anthropic", "openai", "gemini"],
+    "stream": true,
+    "retry_count": 2,
+    "_comment": "AI provider configuration"
+  },
+  
+  "default_model": "ollama:llama3.2:1b",
+  
+  "logging": {
+    "level": "INFO",
+    "file": null,
+    "_comment": "Logging configuration"
+  },
+  
+  "security": {
+    "enable_safety_checks": true,
+    "block_dangerous_commands": true,
+    "require_confirmation_for_sudo": true,
+    "_comment": "Security and safety settings"
+  },
+  
+  "features": {
+    "auto_compress_context": true,
+    "extract_ctf_findings": true,
+    "smart_command_suggestions": true,
+    "failure_auto_help": true,
+    "_comment": "Feature toggles"
+  },
+  
+  "ui": {
+    "show_performance_tips": true,
+    "colored_output": true,
+    "show_hardware_info_on_start": false,
+    "_comment": "User interface settings"
+  },
+  
+  "providers": {
+    "ollama": {
+      "base_url": "http://localhost:11434",
+      "timeout": 60,
+      "_comment": "Ollama local provider settings"
+    },
+    
+    "openai": {
+      "api_key": null,
+      "organization": null,
+      "timeout": 30,
+      "_comment": "OpenAI provider settings - set API key via environment or here"
+    },
+    
+    "anthropic": {
+      "api_key": null,
+      "timeout": 30,
+      "_comment": "Anthropic provider settings - set API key via environment or here"
+    },
+    
+    "gemini": {
+      "api_key": null,
+      "timeout": 30,
+      "_comment": "Google Gemini provider settings - set API key via environment or here"
+    }
+  },
+  
+  "ctf": {
+    "auto_extract_flags": true,
+    "auto_extract_ips": true,
+    "auto_extract_hashes": true,
+    "track_exploits": true,
+    "prioritize_findings": true,
+    "_comment": "CTF-specific features"
+  }
+}
