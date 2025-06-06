@@ -66,8 +66,26 @@ class OllamaProvider(AIProvider):
         
         if OLLAMA_AVAILABLE:
             try:
-                self.client = ollama.Client()
-                self.logger.info("Ollama provider initialized")
+                # Try different base URLs in case of custom setup
+                base_urls = [
+                    config.get('providers', {}).get('ollama', {}).get('base_url', 'http://localhost:11434'),
+                    'http://localhost:11434',
+                    'http://127.0.0.1:11434'
+                ]
+                
+                for base_url in base_urls:
+                    try:
+                        self.client = ollama.Client(host=base_url)
+                        # Test connection by listing models
+                        test = self.client.list()
+                        self.logger.info(f"Ollama provider initialized with {base_url}")
+                        break
+                    except Exception:
+                        continue
+                        
+                if not self.client:
+                    self.logger.warning("Failed to connect to Ollama on any URL")
+                    
             except Exception as e:
                 self.logger.error(f"Failed to initialize Ollama: {e}")
     
@@ -102,13 +120,30 @@ class OllamaProvider(AIProvider):
             response = self.client.list()
             models = []
             
+            # Handle different response formats
             if hasattr(response, 'models'):
                 for model in response.models:
                     if hasattr(model, 'model'):
                         models.append(model.model)
                     elif hasattr(model, 'name'):
                         models.append(model.name)
+                    else:
+                        # Handle string representation  
+                        model_str = str(model)
+                        if 'model=' in model_str:
+                            # Extract model name from Model(model='name', ...) format
+                            import re
+                            match = re.search(r"model='([^']+)'", model_str)
+                            if match:
+                                models.append(match.group(1))
+            elif isinstance(response, dict) and 'models' in response:
+                for model in response['models']:
+                    if isinstance(model, dict):
+                        models.append(model.get('name', model.get('model', '')))
+                    else:
+                        models.append(str(model))
             
+            self.logger.info(f"Found Ollama models: {models}")
             return models
         except Exception as e:
             self.logger.error(f"Failed to list Ollama models: {e}")
@@ -295,7 +330,7 @@ class AIModelManager:
     def _get_default_model(self, provider: str) -> str:
         """Get default model for a provider"""
         defaults = {
-            'ollama': 'llama3.2:1b',
+            'ollama': 'deepseek-r1:8b',
             'openai': 'gpt-3.5-turbo',
             'anthropic': 'claude-3-sonnet',
             'gemini': 'gemini-pro'

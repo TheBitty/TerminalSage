@@ -38,7 +38,7 @@ class CTFAgent:
         # Agent state
         self.chat_mode = False
         self.running = True
-        self.current_model = self.config.get('default_model', 'ollama:llama3.2:1b')
+        self.current_model = self.config.get('default_model', 'ollama:deepseek-r1:8b')
         
         # Setup readline for better terminal experience
         self._setup_readline()
@@ -192,7 +192,7 @@ class CTFAgent:
             print("🤔 Thinking...", end='', flush=True)
             
             # Get AI response
-            response = await self.ai_manager.chat(
+            response_generator = self.ai_manager.chat(
                 messages=self.context_manager.get_messages(),
                 model=self.current_model,
                 stream=True
@@ -205,7 +205,7 @@ class CTFAgent:
             print("🤖 ", end='', flush=True)
             full_response = ""
             
-            async for chunk in response:
+            async for chunk in response_generator:
                 print(chunk, end='', flush=True)
                 full_response += chunk
             
@@ -239,7 +239,7 @@ Provide:
 Keep it concise and practical."""
             
             # Get suggestion
-            response = await self.ai_manager.chat(
+            response_generator = self.ai_manager.chat(
                 messages=[
                     {"role": "system", "content": "You are a CTF and security expert assistant."},
                     {"role": "user", "content": prompt}
@@ -249,7 +249,7 @@ Keep it concise and practical."""
             )
             
             print("\n📚 Command Help:\n")
-            async for chunk in response:
+            async for chunk in response_generator:
                 print(chunk, end='', flush=True)
             print("\n")
             
@@ -275,7 +275,7 @@ Please explain:
 Keep it brief and practical for CTF work."""
             
             try:
-                response = await self.ai_manager.chat(
+                response_generator = self.ai_manager.chat(
                     messages=[
                         {"role": "system", "content": "You are a CTF and security expert assistant."},
                         {"role": "user", "content": prompt}
@@ -285,7 +285,7 @@ Keep it brief and practical for CTF work."""
                 )
                 
                 print("\n🛠️  Troubleshooting:\n")
-                async for chunk in response:
+                async for chunk in response_generator:
                     print(chunk, end='', flush=True)
                 print("\n")
                 
